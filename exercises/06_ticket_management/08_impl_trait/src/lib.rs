@@ -7,6 +7,34 @@ pub struct TicketStore {
     tickets: Vec<Ticket>,
 }
 
+impl<'a> IntoIterator for &'a TicketStore {
+    type Item = &'a Ticket;
+    type IntoIter = std::slice::Iter<'a, Ticket>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.tickets.iter()
+    }
+}
+
+impl TicketStore {    
+
+    pub fn iter(&self) -> std::slice::Iter<'_, Ticket> {
+        self.tickets.iter()
+    }
+
+    fn categories(&self, category: Status) -> impl Iterator<Item = &Ticket> {
+        self.iter()
+        .filter(move |t|{t.status == category})
+    }
+
+    pub fn to_dos(&self) -> Vec<&Ticket> {
+        self.categories(Status::ToDo).collect()
+    }
+
+    pub fn in_progress(&self) -> impl Iterator<Item = &Ticket> {
+        self.categories(Status::InProgress)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ticket {
     pub title: TicketTitle,
